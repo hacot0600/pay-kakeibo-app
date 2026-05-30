@@ -770,17 +770,84 @@
     $('globalMonth').addEventListener('change', (e) => setMonth(e.target.value));
     $('toggleDarkBtn').addEventListener('click', async () => { state.ui.darkMode = !state.ui.darkMode; await saveAndRender(); });
     $('exportAllBtn').addEventListener('click', exportAll);
-    $('importAllBtn').addEventListener('click', () => $('importAllFile').click());
-    $('importAllFile').addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try { renderImportPreview(validateState(JSON.parse(reader.result))); }
-        catch (err) { renderImportPreview({ ok: false, errors: ['JSONとして読み込めません。'] }); }
-      };
-      reader.readAsText(file); e.target.value = '';
+    $('importAllBtn').addEventListener('click', () => {
+  $('importAllFile').click();
+});
+
+$('importAllFile').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+
+  if (!file) {
+    toast('ファイルが選択されませんでした');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const result = validateState(parsed);
+
+      renderImportPreview(result);
+
+      // 復元プレビューがある設定ページへ自動移動
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.classList.remove('active');
+        if (btn.dataset.page === 'settingsPage') {
+          btn.classList.add('active');
+        }
+      });
+
+      document.querySelectorAll('.page').forEach((page) => {
+        page.classList.remove('active');
+      });
+
+      $('settingsPage').classList.add('active');
+
+      if (result.ok) {
+        toast('復元候補を読み込みました。設定・バックアップページで「復元する」を押してください');
+      } else {
+        toast('JSONを読み込みましたが、形式に問題があります');
+      }
+
+    } catch (err) {
+      renderImportPreview({
+        ok: false,
+        errors: ['JSONとして読み込めません。ファイル形式を確認してください。']
+      });
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.classList.remove('active');
+        if (btn.dataset.page === 'settingsPage') {
+          btn.classList.add('active');
+        }
+      });
+
+      document.querySelectorAll('.page').forEach((page) => {
+        page.classList.remove('active');
+      });
+
+      $('settingsPage').classList.add('active');
+
+      toast('JSONとして読み込めませんでした');
+    }
+
+    e.target.value = '';
+  };
+
+  reader.onerror = () => {
+    renderImportPreview({
+      ok: false,
+      errors: ['ファイルの読み込みに失敗しました。別の場所に保存してから再度選択してください。']
     });
 
+    toast('ファイルの読み込みに失敗しました');
+    e.target.value = '';
+  };
+
+  reader.readAsText(file, 'utf-8');
+});
     $('budgetIncomeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = $('budgetIncomeName').value.trim(); const amount = normalizeAmount($('budgetIncomeAmount').value);
