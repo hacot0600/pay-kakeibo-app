@@ -422,12 +422,73 @@
     input.value = todayStr.startsWith(month) ? todayStr : `${month}-01`;
   }
 
+  function signedYen(value) {
+    const amount = Number(value || 0);
+    if (amount > 0) return `+${amount.toLocaleString()} 円`;
+    if (amount < 0) return `-${Math.abs(amount).toLocaleString()} 円`;
+    return '0 円';
+  }
+
+  function updateActualRemainingDesign(remaining) {
+    const amount = Number(remaining || 0);
+    const row = $('actualRemainingRow');
+    const value = $('actualRemainingTotal');
+    const status = $('actualRemainingStatus');
+    if (!row || !value || !status) return;
+
+    row.classList.remove('positive-balance', 'negative-balance', 'neutral-balance');
+    value.textContent = signedYen(amount);
+
+    if (amount > 0) {
+      row.classList.add('positive-balance');
+      status.textContent = '黒字';
+    } else if (amount < 0) {
+      row.classList.add('negative-balance');
+      status.textContent = '赤字';
+    } else {
+      row.classList.add('neutral-balance');
+      status.textContent = '収支ぴったり';
+    }
+  }
+
+  function renderIncomeExpensePie(income, expense) {
+    const pie = $('incomeExpensePie');
+    const incomeLabel = $('pieIncomeLabel');
+    const expenseLabel = $('pieExpenseLabel');
+    const note = $('pieChartNote');
+    if (!pie || !incomeLabel || !expenseLabel || !note) return;
+
+    const incomeAmount = Math.max(0, Number(income || 0));
+    const expenseAmount = Math.max(0, Number(expense || 0));
+    const total = incomeAmount + expenseAmount;
+
+    if (total <= 0) {
+      pie.classList.add('empty');
+      pie.style.background = 'conic-gradient(var(--line) 0 360deg)';
+      incomeLabel.textContent = '0%';
+      expenseLabel.textContent = '0%';
+      note.textContent = '収入・支出の実績を入力すると円グラフが表示されます。';
+      return;
+    }
+
+    const incomeRate = Math.round((incomeAmount / total) * 100);
+    const expenseRate = 100 - incomeRate;
+    const incomeDeg = (incomeAmount / total) * 360;
+
+    pie.classList.remove('empty');
+    pie.style.background = `conic-gradient(var(--success) 0deg ${incomeDeg}deg, var(--danger) ${incomeDeg}deg 360deg)`;
+    incomeLabel.textContent = `${incomeRate}%`;
+    expenseLabel.textContent = `${expenseRate}%`;
+    note.textContent = `収入 ${yen(incomeAmount)} / 支出 ${yen(expenseAmount)} の比率です。`;
+  }
+
   function renderKakeibo() {
     const month = getMonth();
     const summary = getActualSummary(month);
     $('actualIncomeTotal').textContent = yen(summary.income);
     $('actualExpenseTotal').textContent = yen(summary.expense);
-    $('actualRemainingTotal').textContent = yen(summary.remaining);
+    updateActualRemainingDesign(summary.remaining);
+    renderIncomeExpensePie(summary.income, summary.expense);
 
     const categorySelect = $('kakeiboCategory'); clear(categorySelect);
     const historyCategoryFilter = $('historyCategoryFilter');

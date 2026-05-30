@@ -125,14 +125,32 @@
           <h3>実績サマリー</h3>
           <div class="summary-row"><span>収入実績</span><strong id="actualIncomeTotal">0 円</strong></div>
           <div class="summary-row"><span>支出実績</span><strong id="actualExpenseTotal">0 円</strong></div>
-          <div class="summary-row big"><span>実績残額</span><strong id="actualRemainingTotal">0 円</strong></div>
+          <div id="actualRemainingRow" class="summary-row big balance-row neutral-balance">
+            <span>実績残額</span>
+            <div class="balance-value-wrap">
+              <strong id="actualRemainingTotal">0 円</strong>
+              <small id="actualRemainingStatus" class="balance-status">収支なし</small>
+            </div>
+          </div>
         </section>
 
-        <section class="card">
-          <h3>カテゴリ別支出</h3>
-          <div id="actualCategoryList" class="stack-list empty-ready"></div>
+        <section class="card chart-card">
+          <h3>収入・支出バランス</h3>
+          <div class="pie-layout">
+            <div id="incomeExpensePie" class="pie-chart" aria-label="収入と支出の円グラフ"></div>
+            <div class="pie-legend">
+              <div class="legend-row"><span class="legend-dot income"></span><span>収入</span><strong id="pieIncomeLabel">0%</strong></div>
+              <div class="legend-row"><span class="legend-dot expense"></span><span>支出</span><strong id="pieExpenseLabel">0%</strong></div>
+            </div>
+          </div>
+          <p id="pieChartNote" class="hint">収入・支出の実績を入力すると円グラフが表示されます。</p>
         </section>
       </div>
+
+      <section class="card">
+        <h3>カテゴリ別支出</h3>
+        <div id="actualCategoryList" class="stack-list empty-ready"></div>
+      </section>
 
       <section class="card">
         <div class="section-row">
