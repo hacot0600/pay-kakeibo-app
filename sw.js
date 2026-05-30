@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pay-kakeibo-v2-cache-v1';
+const CACHE_NAME = 'pay-kakeibo-v3';
 const ASSETS = [
   './',
   './index.html',
