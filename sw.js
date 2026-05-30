@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pay-kakeibo-v3';
+const CACHE_NAME = 'pay-kakeibo-v4-restore-fix-cache-v1';
 const ASSETS = [
   './',
   './index.html',
